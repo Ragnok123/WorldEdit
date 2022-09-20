@@ -113,6 +113,59 @@ public class WorldUtils {
 
         return blocks;
     }
+    
+    public static int rotateY(WEPlayer dat, Position center, Selection sel, int degrees) {
+    	double rad = Math.toRadians(degrees);
+    	int blocks = 0;
+    	Vector3 v = new Vector3();
+    	
+    	int diffX = center.getFloorX();
+    	int diffZ = center.getFloorZ();
+    	
+    	int minX = (int) Math.min(sel.getPosOne().x, sel.getPosTwo().x);
+        int minY = (int) Math.min(sel.getPosOne().y, sel.getPosTwo().y);
+        int minZ = (int) Math.min(sel.getPosOne().z, sel.getPosTwo().z);
+        int maxX = (int) Math.max(sel.getPosOne().x, sel.getPosTwo().x);
+        int maxY = (int) Math.max(sel.getPosOne().y, sel.getPosTwo().y);
+        int maxZ = (int) Math.max(sel.getPosOne().z, sel.getPosTwo().z);
+    	
+    	BlocksArray undo = new BlocksArray();
+    	
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    int id = sel.getPosOne().level.getBlockIdAt(x, y, z);
+                    if (id == 0) {
+                        continue;
+                    }
+                    int damage = center.level.getBlockDataAt(x, y, z);
+                    Block b = Block.get(id, damage);
+                    if(b != null) {
+                        int newX = x - diffX;
+                        int newZ = z - diffZ;
+                        double kek = Math.pow(newX, 2) + Math.pow(newZ, 2);
+                        double distance = Math.sqrt(kek);
+                        double angle = Math.atan2(newZ, newX) + rad;
+
+                        v.setComponents(
+                        		Math.round(distance * Math.cos(angle)) + diffX,
+                        		y,
+                        		Math.round(distance * Math.sin(angle)) + diffZ);
+                        undo.blocks.add(center.getLevel().getBlock(new Vector3(x,y,z)));
+                        center.level.setBlock(new Vector3(x,y,z), Block.get(Block.AIR));
+                        center.level.setBlock(v, b);
+                        
+                        dat.getPlayer().sendMessage("Old x: " + x + ", Old z: " + z);
+                        dat.getPlayer().sendMessage("New x: " + v.x + ", New z: " + v.z);
+                        blocks++;
+                    }
+                }
+            }
+        }
+        dat.getUndoSteps().add(undo);
+    	
+    	return blocks;
+    }
 
     public static int cyl(WEPlayer dat, Position center, int radius, Block b) {
         Vector3 v = new Vector3();

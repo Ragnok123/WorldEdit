@@ -1,4 +1,5 @@
 ru\ragnok123\worldEdit\commands\geometry\HSphereCommand.class
+ru\ragnok123\worldEdit\commands\RotateCommand$1.class
 ru\ragnok123\worldEdit\commands\HelpCommand.class
 ru\ragnok123\worldEdit\commands\ReplaceCommand.class
 ru\ragnok123\worldEdit\WEPlayer.class
@@ -10,8 +11,11 @@ ru\ragnok123\worldEdit\WorldEdit.class
 ru\ragnok123\worldEdit\commands\WallsCommand.class
 ru\ragnok123\worldEdit\commands\CopyCommand.class
 ru\ragnok123\worldEdit\commands\WECommand.class
+ru\ragnok123\worldEdit\commands\PasteCommand$1.class
 ru\ragnok123\worldEdit\utils\Selection.class
 ru\ragnok123\worldEdit\commands\DeselCommand.class
+ru\ragnok123\worldEdit\commands\RotateCommand.class
+ru\ragnok123\worldEdit\commands\CutCommand$1.class
 ru\ragnok123\worldEdit\commands\PosTwoCommand.class
 ru\ragnok123\worldEdit\commands\WandCommand.class
 ru\ragnok123\worldEdit\WEListener.class
@@ -23,3 +27,4 @@ ru\ragnok123\worldEdit\commands\UndoCommand.class
 ru\ragnok123\worldEdit\utils\WorldUtils.class
 ru\ragnok123\worldEdit\utils\Utils.class
 ru\ragnok123\worldEdit\commands\PosOneCommand.class
+ru\ragnok123\worldEdit\commands\WallsCommand$1.class

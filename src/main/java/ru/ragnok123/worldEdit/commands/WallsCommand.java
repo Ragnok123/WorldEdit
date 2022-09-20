@@ -1,7 +1,9 @@
 package ru.ragnok123.worldEdit.commands;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.utils.TextFormat;
 import ru.ragnok123.worldEdit.WEPlayer;
 import ru.ragnok123.worldEdit.WorldEdit;
@@ -31,7 +33,15 @@ public class WallsCommand extends WECommand {
 			p.sendMessage(WorldEdit.getPrefix() + TextFormat.RED + "Block '" + args[0] + "' doesn't exist");
 			return;
 		}
-		p.sendMessage(WorldEdit.getPrefix() + TextFormat.AQUA + String.valueOf(WorldUtils.walls(sel.getPosOne(), sel.getPosTwo(), b)) + TextFormat.GREEN + " block(s) have been changed.");
+		Server.getInstance().getScheduler().scheduleAsyncTask(new AsyncTask() {
+
+			@Override
+			public void onRun() {
+				p.sendMessage(WorldEdit.getPrefix() + TextFormat.AQUA + String.valueOf(WorldUtils.walls(sel.getPosOne(), sel.getPosTwo(), b)) + TextFormat.GREEN + " block(s) have been changed.");
+			}
+			
+		});
+		
 	}
 
 }

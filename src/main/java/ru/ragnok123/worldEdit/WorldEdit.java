@@ -47,6 +47,8 @@ public class WorldEdit extends PluginBase implements Listener {
 		getServer().getCommandMap().register("//cut", new CutCommand());
 		getServer().getCommandMap().register("//undo", new UndoCommand());
 		getServer().getCommandMap().register("//desel", new DeselCommand());
+		getServer().getCommandMap().register("//replace", new ReplaceCommand());
+		getServer().getCommandMap().register("//rotate", new RotateCommand());
 
 		getServer().getCommandMap().register("//cyl", new CylCommand());
 		getServer().getCommandMap().register("//hcyl", new HCylCommand());

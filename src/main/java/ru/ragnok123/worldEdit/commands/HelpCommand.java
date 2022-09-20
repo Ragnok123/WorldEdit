@@ -45,7 +45,7 @@ public class HelpCommand extends WECommand {
 					+ "Set blocks in selected area";
 			help += "\n" + TextFormat.YELLOW + "   //walls <block>" + TextFormat.GRAY + " - " + TextFormat.RED
 					+ "Set walls in selectet area";
-			help += "\n" + TextFormat.YELLOW + "   //replace <current block> <target block>" + TextFormat.GRAY + " - "
+			help += "\n" + TextFormat.YELLOW + "   //replace <original block> <target block>" + TextFormat.GRAY + " - "
 					+ TextFormat.RED + "Replace blocks in selected area";
 			break;
 		case 2:
@@ -67,6 +67,8 @@ public class HelpCommand extends WECommand {
 					+ "Copy entire area into clipboard";
 			help += "\n" + TextFormat.YELLOW + "   //paste" + TextFormat.GRAY + " - " + TextFormat.RED
 					+ "Paste clipboard";
+			help += "\n" + TextFormat.YELLOW + "   //rotate <axis> <degree>" + TextFormat.GRAY + " - " + TextFormat.RED
+					+ "Rotate object around axis";
 			help += "\n" + TextFormat.YELLOW + "   //wand" + TextFormat.GRAY + " - " + TextFormat.RED + "Give wand axe";
 			break;
 		}
