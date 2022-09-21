@@ -154,9 +154,6 @@ public class WorldUtils {
                         undo.blocks.add(center.getLevel().getBlock(new Vector3(x,y,z)));
                         center.level.setBlock(new Vector3(x,y,z), Block.get(Block.AIR));
                         center.level.setBlock(v, b);
-                        
-                        dat.getPlayer().sendMessage("Old x: " + x + ", Old z: " + z);
-                        dat.getPlayer().sendMessage("New x: " + v.x + ", New z: " + v.z);
                         blocks++;
                     }
                 }
