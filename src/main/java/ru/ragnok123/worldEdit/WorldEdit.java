@@ -12,6 +12,7 @@ import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerInteractEvent.Action;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemAxeWood;
+import cn.nukkit.plugin.LibraryLoader;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.TextFormat;
 import lombok.Getter;
@@ -33,7 +34,10 @@ public class WorldEdit extends PluginBase implements Listener {
 	@Override
 	public void onEnable() {
 		instance = this;
-		getServer().getPluginManager().registerEvents(new WEListener(), this);;
+		getServer().getPluginManager().registerEvents(new WEListener(), this);
+		if(!getDataFolder().exists()) {
+			getDataFolder().mkdirs();
+		}
 
 		getServer().getCommandMap().register("//help", new HelpCommand());
 
@@ -49,6 +53,8 @@ public class WorldEdit extends PluginBase implements Listener {
 		getServer().getCommandMap().register("//desel", new DeselCommand());
 		getServer().getCommandMap().register("//replace", new ReplaceCommand());
 		getServer().getCommandMap().register("//rotate", new RotateCommand());
+		getServer().getCommandMap().register("//compress", new CompressCommand());
+		getServer().getCommandMap().register("//decompress", new DecompressCommand());
 
 		getServer().getCommandMap().register("//cyl", new CylCommand());
 		getServer().getCommandMap().register("//hcyl", new HCylCommand());

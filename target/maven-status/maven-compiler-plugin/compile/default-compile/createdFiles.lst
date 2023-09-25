@@ -7,6 +7,7 @@ ru\ragnok123\worldEdit\commands\geometry\CylCommand.class
 ru\ragnok123\worldEdit\utils\BlocksArray.class
 ru\ragnok123\worldEdit\WEListener$1.class
 ru\ragnok123\worldEdit\commands\CutCommand.class
+ru\ragnok123\worldEdit\commands\DecompressCommand.class
 ru\ragnok123\worldEdit\WorldEdit.class
 ru\ragnok123\worldEdit\commands\WallsCommand.class
 ru\ragnok123\worldEdit\commands\CopyCommand.class
@@ -18,6 +19,7 @@ ru\ragnok123\worldEdit\commands\RotateCommand.class
 ru\ragnok123\worldEdit\commands\CutCommand$1.class
 ru\ragnok123\worldEdit\commands\PosTwoCommand.class
 ru\ragnok123\worldEdit\commands\WandCommand.class
+ru\ragnok123\worldEdit\commands\CompressCommand.class
 ru\ragnok123\worldEdit\WEListener.class
 ru\ragnok123\worldEdit\commands\geometry\SphereCommand.class
 ru\ragnok123\worldEdit\commands\geometry\HCylCommand.class
