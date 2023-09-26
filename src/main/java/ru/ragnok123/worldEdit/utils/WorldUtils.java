@@ -1,6 +1,8 @@
 package ru.ragnok123.worldEdit.utils;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.blockentity.BlockEntity;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3;
 import ru.ragnok123.worldEdit.WEPlayer;
@@ -16,85 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class WorldUtils {
-
-	public static int compress(WEPlayer dat, Position pos1, Position pos2, String schematic) {
-		int minX = (int) Math.min(pos1.x, pos2.x);
-		int minY = (int) Math.min(pos1.y, pos2.y);
-		int minZ = (int) Math.min(pos1.z, pos2.z);
-		int maxX = (int) Math.max(pos1.x, pos2.x);
-		int maxY = (int) Math.max(pos1.y, pos2.y);
-		int maxZ = (int) Math.max(pos1.z, pos2.z);
-		
-		Vector3 v = new Vector3();
-		int blocks = 0;
-		ListTag list = new ListTag("Blocks");
-		
-		for (int x = minX; x <= maxX; x++) {
-			for (int y = minY; y <= maxY; y++) {
-				for (int z = minZ; z <= maxZ; z++) {
-					int id = pos1.level.getBlockIdAt(x, y, z);
-					if (id == 0) {
-						continue;
-					}
-					int damage = pos1.level.getBlockDataAt(x, y, z);
-
-					Block b = Block.get(id, damage);
-					CompoundTag block = new CompoundTag("Block");
-					block.add(new IntTag("x", x));
-					block.add(new IntTag("y", y));
-					block.add(new IntTag("z", z));
-					block.add(new IntTag("id", id));
-					block.add(new IntTag("damage", damage));
-					list.add(block);
-					blocks++;
-				}
-			}
-		}
-		
-		CompoundTag data = new CompoundTag(schematic);
-		data.add(new IntTag("Version", 1));
-		data.add(list);
-		File file = new File(WorldEdit.get().getDataFolder() + "/" + schematic + ".we");
-		try {
-			if(!file.exists()) {
-				file.createNewFile();
-			}
-			NBTIO.write(data, file,ByteOrder.LITTLE_ENDIAN, true, CompressType.ZSTD);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return blocks;
-	}
-	
-	public static int decompress(WEPlayer dat,String schematic) {
-		int blocks = 0;
-		File file = new File(WorldEdit.get().getDataFolder() + "/" + schematic + ".we");
-		try {
-			CompoundTag data = NBTIO.read(file,ByteOrder.LITTLE_ENDIAN, true, CompressType.ZSTD);
-			System.out.println("Name: " + data.getName() + ", Size: " + data.toString().length());
-
-			for(Entry<String, Tag> entry : data.getValue().entrySet()) {
-				System.out.println("Entry: " + entry.getKey());
-				System.out.println("Value:" + entry.getValue().getName());
-			}
-			IntTag version = (IntTag) data.getValue("Version");
-			ListTag blocksss = (ListTag) data.getValue("Blocks");
-			List<Tag> b = blocksss.getValue();
-			for(Tag bl : b) {
-				CompoundTag block = (CompoundTag)bl;
-				int x = ((IntTag)block.getValue("x")).getValue();
-				int y = ((IntTag)block.getValue("y")).getValue();
-				int z = ((IntTag)block.getValue("z")).getValue();
-				int id = ((IntTag)block.getValue("id")).getValue();
-				int damage = ((IntTag)block.getValue("damage")).getValue();
-				dat.getPlayer().getLevel().setBlock(new Vector3(x,y,z),Block.get(id,damage));
-				blocks++;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return blocks;
-	}
 
 	public static int set(WEPlayer dat, Position pos1, Position pos2, Block b) {
 		int minX = (int) Math.min(pos1.x, pos2.x);
@@ -165,20 +88,29 @@ public class WorldUtils {
 			for (int y = minY; y <= maxY; y++) {
 				for (int z = minZ; z <= maxZ; z++) {
 					int id = pos1.level.getBlockIdAt(x, y, z);
-
 					if (id == 0) {
 						continue;
 					}
-
 					int damage = pos1.level.getBlockDataAt(x, y, z);
 
 					Block b = Block.get(id, damage);
-
 					if (b != null) {
 						b.setComponents(x - center.getFloorX(), y - center.getFloorY(), z - center.getFloorZ());
 						copy.blocks.add(b);
+						if(pos1.getLevel().getBlockEntity(new Vector3(x,y,z)) != null) {
+							BlockEntity blE = (BlockEntity) pos1.getLevel().getBlockEntity(new Vector3(x,y,z)).clone();
+							blE.setComponents(x - center.getFloorX(), y - center.getFloorY(), z - center.getFloorZ());
+							copy.blockEntities.add(blE);
+						}
 						blocks++;
-					}
+					}/*
+					for(Entity entityy : pos1.level.getEntities()) {
+						if(entityy.getPosition().asVector3f().asVector3().equals(new Vector3(x,y,z))) {
+							Entity entity = (Entity)entityy.clone();
+							entity.setComponents(x - center.getFloorX(), y - center.getFloorY(), z - center.getFloorZ());
+							copy.entities.add(entity);
+						}
+					}*/
 				}
 			}
 		}
@@ -198,6 +130,19 @@ public class WorldUtils {
 			center.getLevel().setBlock(v, b, true, false);
 			blocks++;
 		}
+		for(BlockEntity blE : copy.blockEntities) {
+			undo.blockEntities.add(blE);
+			blE.setComponents(center.getFloorX() + blE.x, center.getFloorY() + blE.y, center.getFloorZ() + blE.z);
+			center.getLevel().addBlockEntity(blE);
+		}
+		/*
+		for(Entity entity : copy.entities) {
+			undo.entities.add(entity);
+			entity.setComponents(center.getFloorX() + entity.x, center.getFloorY() + entity.y, center.getFloorZ() + entity.z);
+			entity.spawnToAll();
+			center.getLevel().addEntity(entity);
+		}*/
+		
 		dat.addUndoBlocks(undo);
 
 		return blocks;
@@ -381,8 +326,104 @@ public class WorldUtils {
 			b.level.setBlock(v, b);
 			blocks++;
 		}
+		for(BlockEntity blE : redo.blockEntities) {
+			blE.setComponents(blE.x, blE.y, blE.z);
+			blE.getLevel().addBlockEntity(blE);
+		}
+		/*
+		for(Entity e : redo.entities) {
+			e.setComponents(e.x, e.y, e.z);
+			e.getLevel().addEntity(e);
+		}*/
 
 		dat.getUndoSteps().remove(step);
+		return blocks;
+	}
+	
+	public static int compress(WEPlayer dat, Position pos1, Position pos2, String schematic) {
+		int minX = (int) Math.min(pos1.x, pos2.x);
+		int minY = (int) Math.min(pos1.y, pos2.y);
+		int minZ = (int) Math.min(pos1.z, pos2.z);
+		int maxX = (int) Math.max(pos1.x, pos2.x);
+		int maxY = (int) Math.max(pos1.y, pos2.y);
+		int maxZ = (int) Math.max(pos1.z, pos2.z);
+		
+		Vector3 v = new Vector3();
+		int blocks = 0;
+		ListTag list = new ListTag("Blocks");
+		ListTag list2 = new ListTag("BlockEntities");
+		
+		for (int x = minX; x <= maxX; x++) {
+			for (int y = minY; y <= maxY; y++) {
+				for (int z = minZ; z <= maxZ; z++) {
+					int id = pos1.level.getBlockIdAt(x, y, z);
+					if (id == 0) {
+						continue;
+					}
+					int damage = pos1.level.getBlockDataAt(x, y, z);
+
+					Block b = Block.get(id, damage);
+					CompoundTag block = new CompoundTag("Block");
+					block.add(new IntTag("x", x));
+					block.add(new IntTag("y", y));
+					block.add(new IntTag("z", z));
+					block.add(new IntTag("id", id));
+					block.add(new IntTag("damage", damage));
+					list.add(block);
+					if(pos1.getLevel().getBlockEntity(new Vector3(x,y,z)) != null) {
+						BlockEntity bE = pos1.getLevel().getBlockEntity(new Vector3(x,y,z));
+						list2.add(Utils.convertNukkitCompoundToNova(bE.namedTag));
+					}
+					blocks++;
+				}
+			}
+		}
+		
+		CompoundTag data = new CompoundTag(schematic);
+		data.add(new IntTag("Version", 1));
+		data.add(list);
+		data.add(list2);
+		File file = new File(WorldEdit.get().getDataFolder() + "/" + schematic + ".we");
+		try {
+			if(!file.exists()) {
+				file.createNewFile();
+			}
+			NBTIO.write(data, file,ByteOrder.LITTLE_ENDIAN, true, CompressType.ZSTD);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return blocks;
+	}
+	
+	public static int decompress(WEPlayer dat,String schematic) {
+		int blocks = 0;
+		File file = new File(WorldEdit.get().getDataFolder() + "/" + schematic + ".we");
+		try {
+			CompoundTag data = NBTIO.read(file,ByteOrder.LITTLE_ENDIAN, true, CompressType.ZSTD);
+			IntTag version = (IntTag) data.getValue("Version");
+			ListTag blocksss = (ListTag) data.getValue("Blocks");
+			ListTag blockentities = (ListTag) data.getValue("BlockEntities");
+			List<Tag> b = blocksss.getValue();
+			List<Tag> bEs = blockentities.getValue();
+			
+			for(Tag bl : b) {
+				CompoundTag block = (CompoundTag)bl;
+				int x = ((IntTag)block.getValue("x")).getValue();
+				int y = ((IntTag)block.getValue("y")).getValue();
+				int z = ((IntTag)block.getValue("z")).getValue();
+				int id = ((IntTag)block.getValue("id")).getValue();
+				int damage = ((IntTag)block.getValue("damage")).getValue();
+				dat.getPlayer().getLevel().setBlock(new Vector3(x,y,z),Block.get(id,damage));
+				blocks++;
+			}
+			for(Tag be : bEs) {
+				cn.nukkit.nbt.tag.CompoundTag blockentity = Utils.convertNovaCompoundToNukkit((CompoundTag)be);
+				dat.getPlayer().getLevel().addBlockEntity(BlockEntity.createBlockEntity(blockentity.getString("id"),dat.getPlayer().getChunk(), blockentity));
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return blocks;
 	}
 }
