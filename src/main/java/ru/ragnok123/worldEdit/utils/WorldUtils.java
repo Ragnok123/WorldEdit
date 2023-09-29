@@ -352,6 +352,7 @@ public class WorldUtils {
 		int blocks = 0;
 		ListTag list = new ListTag("Blocks");
 		ListTag list2 = new ListTag("BlockEntities");
+		ListTag list3 = new ListTag("Entities");
 		
 		for (int x = minX; x <= maxX; x++) {
 			for (int y = minY; y <= maxY; y++) {
@@ -379,10 +380,17 @@ public class WorldUtils {
 			}
 		}
 		
+		for(Entity entity : dat.getPlayer().getLevel().getEntities()) {
+			if(Utils.insideArea(entity, pos1, pos2)) {
+				list3.add(Utils.convertNukkitCompoundToNova(entity.namedTag));
+			}
+		}
+		
 		CompoundTag data = new CompoundTag(schematic);
 		data.add(new IntTag("Version", 1));
 		data.add(list);
 		data.add(list2);
+		data.add(list3);
 		File file = new File(WorldEdit.get().getDataFolder() + "/" + schematic + ".we");
 		try {
 			if(!file.exists()) {
@@ -403,8 +411,10 @@ public class WorldUtils {
 			IntTag version = (IntTag) data.getValue("Version");
 			ListTag blocksss = (ListTag) data.getValue("Blocks");
 			ListTag blockentities = (ListTag) data.getValue("BlockEntities");
+			ListTag entities = (ListTag) data.getValue("Entities");
 			List<Tag> b = blocksss.getValue();
 			List<Tag> bEs = blockentities.getValue();
+			List<Tag> e = entities.getValue();
 			
 			for(Tag bl : b) {
 				CompoundTag block = (CompoundTag)bl;
@@ -419,6 +429,12 @@ public class WorldUtils {
 			for(Tag be : bEs) {
 				cn.nukkit.nbt.tag.CompoundTag blockentity = Utils.convertNovaCompoundToNukkit((CompoundTag)be);
 				dat.getPlayer().getLevel().addBlockEntity(BlockEntity.createBlockEntity(blockentity.getString("id"),dat.getPlayer().getChunk(), blockentity));
+			}
+			for(Tag es : e) {
+				cn.nukkit.nbt.tag.CompoundTag entity = Utils.convertNovaCompoundToNukkit((CompoundTag)es);
+				Entity en = Entity.createEntity(entity.getString("id"), dat.getPlayer().getChunk(), entity);
+				en.spawnToAll();
+				dat.getPlayer().getLevel().addEntity(en);
 			}
 			
 		} catch (IOException e) {
