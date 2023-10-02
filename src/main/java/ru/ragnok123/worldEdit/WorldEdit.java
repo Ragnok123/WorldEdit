@@ -30,6 +30,8 @@ public class WorldEdit extends PluginBase implements Listener {
 	public static WorldEdit instance;
 	@Getter
 	private static String prefix = TextFormat.YELLOW + "WE> ";
+	
+	public static final int COMPRESS_VERSION = 2;
 
 	@Override
 	public void onEnable() {

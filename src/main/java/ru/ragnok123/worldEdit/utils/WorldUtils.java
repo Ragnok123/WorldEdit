@@ -340,6 +340,17 @@ public class WorldUtils {
 		return blocks;
 	}
 	
+	/*
+	 * NOW - BLOCKS: (x,y,z), (x1,y1,z1), (x2,y2,z2), (x,y1,z), (x, y2,z) etc
+	 * Blocks (List of compounds)
+	 * 		Block, x, y, z, data
+	 * 		Block, z, y, z, data
+	 * 
+	 * SHOULD BE - Y: (x,z), (x1, z1), Y1: (x1,z1), (x2, z2), Y2: (x2, z2)
+	 * Blocks (list of lists)
+	 * 		Y (list of compounds)
+	 * 			x, z, data
+	 */
 	public static int compress(WEPlayer dat, Position pos1, Position pos2, String schematic) {
 		int minX = (int) Math.min(pos1.x, pos2.x);
 		int minY = (int) Math.min(pos1.y, pos2.y);
@@ -354,23 +365,23 @@ public class WorldUtils {
 		ListTag list2 = new ListTag("BlockEntities");
 		ListTag list3 = new ListTag("Entities");
 		
-		for (int x = minX; x <= maxX; x++) {
-			for (int y = minY; y <= maxY; y++) {
+		for (int y = minY; y <= maxY; y++) {
+			CompoundTag heights = new CompoundTag("Y");
+			heights.add(new IntTag("height",  y));
+			ListTag Bl = new ListTag("Blocks");
+			for (int x = minX; x <= maxX; x++) {
 				for (int z = minZ; z <= maxZ; z++) {
 					int id = pos1.level.getBlockIdAt(x, y, z);
 					if (id == 0) {
 						continue;
 					}
 					int damage = pos1.level.getBlockDataAt(x, y, z);
-
-					Block b = Block.get(id, damage);
 					CompoundTag block = new CompoundTag("Block");
 					block.add(new IntTag("x", x));
-					block.add(new IntTag("y", y));
 					block.add(new IntTag("z", z));
 					block.add(new IntTag("id", id));
 					block.add(new IntTag("damage", damage));
-					list.add(block);
+					Bl.add(block);
 					if(pos1.getLevel().getBlockEntity(new Vector3(x,y,z)) != null) {
 						BlockEntity bE = pos1.getLevel().getBlockEntity(new Vector3(x,y,z));
 						list2.add(Utils.convertNukkitCompoundToNova(bE.namedTag));
@@ -378,6 +389,8 @@ public class WorldUtils {
 					blocks++;
 				}
 			}
+			heights.add(Bl);
+			list.add(heights);
 		}
 		
 		for(Entity entity : dat.getPlayer().getLevel().getEntities()) {
@@ -387,7 +400,7 @@ public class WorldUtils {
 		}
 		
 		CompoundTag data = new CompoundTag(schematic);
-		data.add(new IntTag("Version", 1));
+		data.add(new IntTag("Version", WorldEdit.COMPRESS_VERSION));
 		data.add(list);
 		data.add(list2);
 		data.add(list3);
@@ -417,14 +430,19 @@ public class WorldUtils {
 			List<Tag> e = entities.getValue();
 			
 			for(Tag bl : b) {
-				CompoundTag block = (CompoundTag)bl;
-				int x = ((IntTag)block.getValue("x")).getValue();
-				int y = ((IntTag)block.getValue("y")).getValue();
-				int z = ((IntTag)block.getValue("z")).getValue();
-				int id = ((IntTag)block.getValue("id")).getValue();
-				int damage = ((IntTag)block.getValue("damage")).getValue();
-				dat.getPlayer().getLevel().setBlock(new Vector3(x,y,z),Block.get(id,damage));
-				blocks++;
+				CompoundTag height = (CompoundTag) bl;
+				int y = ((IntTag)height.getValue("height")).getValue();
+				ListTag yBlocks = (ListTag)height.getValue("Blocks");
+				List<Tag> yBl = yBlocks.getValue();
+				for(Tag blockss : yBl) {
+					CompoundTag block = (CompoundTag)blockss;
+					int x = ((IntTag)block.getValue("x")).getValue();
+					int z = ((IntTag)block.getValue("z")).getValue();
+					int id = ((IntTag)block.getValue("id")).getValue();
+					int damage = ((IntTag)block.getValue("damage")).getValue();
+					dat.getPlayer().getLevel().setBlock(new Vector3(x,y,z),Block.get(id,damage));
+					blocks++;
+				}
 			}
 			for(Tag be : bEs) {
 				cn.nukkit.nbt.tag.CompoundTag blockentity = Utils.convertNovaCompoundToNukkit((CompoundTag)be);

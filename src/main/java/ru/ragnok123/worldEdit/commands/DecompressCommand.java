@@ -24,8 +24,9 @@ public class DecompressCommand extends WECommand {
 		if(!file.exists()) {
 			p.sendMessage(WorldEdit.getPrefix() + TextFormat.RED + "Schematic "+TextFormat.AQUA + args[0] + " does not exists.");
 		}
-		
-		p.sendMessage(WorldEdit.getPrefix() + TextFormat.AQUA + String.valueOf(WorldUtils.decompress(dat, args[0])) + TextFormat.GREEN + " block(s) have been decompressed from "+TextFormat.AQUA + args[0] + ".we "+TextFormat.GREEN+".");
+		if(checkForDecompress(dat, args[0])) {
+			p.sendMessage(WorldEdit.getPrefix() + TextFormat.AQUA + String.valueOf(WorldUtils.decompress(dat, args[0])) + TextFormat.GREEN + " block(s) have been decompressed from "+TextFormat.AQUA + args[0] + ".we "+TextFormat.GREEN+".");
+		}
 	}
 
 }
